@@ -9,6 +9,6 @@ Small Programming Experiments in different languages that do not justify being p
 * [TCP Server](https://github.com/EldoranDev/experiments/tree/main/go/tcp-server)
 * [TCP Client](https://github.com/EldoranDev/experiments/tree/main/go/tcp-client)
 
-## Language Independent
+## TypeScript
 
-* [TCP Messages](https://github.com/EldoranDev/experiments/tree/main/tcp/messages)
+* [TCP Client](https://github.com/EldoranDev/experiments/tree/main/ts/tcp-client)

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"net"
 
 	"github.com/EldoranDev/experiments/go/tcp-server/tcp"
@@ -34,16 +35,24 @@ func handleClient(conn net.Conn) {
 	buffer := make([]byte, 1024)
 
 	for {
-		_, err := conn.Read(buffer)
+
+		n, err := conn.Read(buffer)
 
 		if err != nil {
+			if err == io.EOF {
+				return
+			}
+
 			fmt.Println("Error Reading:", err)
 			return
 		}
 
 		var message tcp.TCPMessage
 
-		message.UnmarshalBinary(buffer)
+		err = message.UnmarshalBinary(buffer[:n])
+		if err != nil {
+			return
+		}
 
 		fmt.Printf("Received: %v - %s\n", message.Command, message.Data)
 	}

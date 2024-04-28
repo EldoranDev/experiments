@@ -2,6 +2,7 @@ package tcp
 
 import (
 	"encoding/binary"
+	"errors"
 	"log"
 )
 
@@ -18,7 +19,10 @@ type TCPMessage struct {
 
 func (t *TCPMessage) UnmarshalBinary(bytes []byte) error {
 	if bytes[0] != VERSION {
-		log.Fatalln("Version Missmatch in Binary Protocol")
+		log.Printf("Data: %x\n", bytes)
+		log.Printf("Version Missmatch in Binary Protocol")
+
+		return errors.New("Version Missmatch")
 	}
 
 	length := int(binary.BigEndian.Uint16(bytes[2:]))
