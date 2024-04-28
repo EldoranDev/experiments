@@ -1,8 +1,6 @@
 package systems
 
 import (
-	"fmt"
-
 	"github.com/EldoranDev/experiments/go/particles/config"
 	"github.com/EngoEngine/ecs"
 	"github.com/EngoEngine/engo/common"
@@ -53,8 +51,6 @@ func (ps *PhysicsSystem) Update(dt float32) {
 			ps.world.RemoveEntity(*e.BasicEntity)
 		}
 	}
-
-	fmt.Printf("Entities: %d\n", len(ps.entities))
 }
 
 func (ps *PhysicsSystem) Remove(basic ecs.BasicEntity) {

@@ -26,6 +26,7 @@ func (*mainScene) Setup(u engo.Updater) {
 
 	world.AddSystem(&systems.EffectSpawningSystem{})
 	world.AddSystem(&systems.PhysicsSystem{})
+	world.AddSystem(&systems.EffectUpdaterSystem{})
 }
 
 func main() {

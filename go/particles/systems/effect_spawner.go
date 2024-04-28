@@ -27,6 +27,7 @@ type Particle struct {
 
 	// Physics Enabled Component
 	VelocityComponent
+	LifeTimeComponent
 }
 
 func (es *EffectSpawningSystem) New(world *ecs.World) {
@@ -54,7 +55,7 @@ func (es *EffectSpawningSystem) Update(dt float32) {
 			panic("Shutting Down Game")
 		}
 
-		for range 1000 {
+		for range 10000 {
 			p := Particle{BasicEntity: ecs.NewBasic()}
 
 			p.SpaceComponent = common.SpaceComponent{
@@ -66,6 +67,11 @@ func (es *EffectSpawningSystem) Update(dt float32) {
 			p.RenderComponent = common.RenderComponent{
 				Drawable: texture,
 				Scale:    engo.Point{X: 2, Y: 2},
+			}
+
+			p.LifeTimeComponent = LifeTimeComponent{
+				TTL:    1.,
+				MaxTTL: 1.,
 			}
 
 			theta := rand.Float64() * 2 * math.Pi
@@ -81,6 +87,8 @@ func (es *EffectSpawningSystem) Update(dt float32) {
 					sys.Add(&p.BasicEntity, &p.RenderComponent, &p.SpaceComponent)
 				case *PhysicsSystem:
 					sys.Add(&p.BasicEntity, &p.SpaceComponent, &p.VelocityComponent)
+				case *EffectUpdaterSystem:
+					sys.Add(&p.BasicEntity, &p.LifeTimeComponent, &p.RenderComponent)
 				}
 			}
 		}
