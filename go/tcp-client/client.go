@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net"
+
+	"github.com/EldoranDev/experiments/go/tcp-client/tcp"
 )
 
 func main() {
@@ -13,7 +16,17 @@ func main() {
 
 	defer conn.Close()
 
-	data := []byte("Hello Server!")
+	pkg := tcp.TCPMessage{
+		Command: ECHO,
+
+		Data: []byte("Hello Server!"),
+	}
+
+	data, err := pkg.MarshalBinary()
+	if err != nil {
+		log.Fatalln("Error marshalling data:", err.Error())
+	}
+
 	_, err = conn.Write(data)
 	if err != nil {
 		fmt.Println("Error Sending:", err)
