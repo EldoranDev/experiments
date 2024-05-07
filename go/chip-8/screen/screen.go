@@ -19,6 +19,11 @@ func (s *Screen) Clear() {
 
 func (s *Screen) Set(x, y uint16) uint8 {
 	i := y*WIDTH + x
+
+	if i > 2048 {
+		return 0
+	}
+
 	if s.data[i] {
 		s.data[i] = false
 		return 1

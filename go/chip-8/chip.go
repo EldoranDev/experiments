@@ -11,6 +11,7 @@ import (
 	"image/color"
 	"log"
 	"os"
+	"time"
 )
 
 type Context struct{}
@@ -27,10 +28,7 @@ func (ctx *Context) Update() error {
 		}
 	}
 
-	instr := cpu.Fetch()
-	op := cpu.Decode(instr)
-
-	cpu.Execute(instr, op)
+	cpu.Timer.Tick()
 
 	return nil
 }
@@ -62,8 +60,7 @@ var cpu *chip8.Cpu
 func main() {
 	ebiten.SetWindowSize(640, 320)
 
-	// TODO: detach update from drawing for timers
-	// ebiten.SetTPS(1)
+	ebiten.SetTPS(60)
 
 	// Init CPU
 	cpu = chip8.New()
@@ -72,7 +69,30 @@ func main() {
 	cpu.ReadRom(os.Args[1])
 	cpu.PC = 0x200
 
+	ticker := time.NewTicker(1000 * time.Microsecond)
+	quit := make(chan struct{})
+
+	go func() {
+		running := true
+
+		for running && !cpu.Error {
+			select {
+			case <-ticker.C:
+				instr := cpu.Fetch()
+				op := cpu.Decode(instr)
+
+				cpu.Execute(instr, op)
+				break
+			case <-quit:
+				running = false
+				ticker.Stop()
+			}
+		}
+	}()
+
 	if err := ebiten.RunGame(&Context{}); err != nil {
 		log.Fatal(err)
 	}
+
+	close(quit)
 }

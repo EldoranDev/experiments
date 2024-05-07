@@ -3,6 +3,8 @@ package chip8
 import (
 	"fmt"
 	"github.com/EldoranDev/experiments/go/chip-8/chip8/keyboard"
+	"github.com/EldoranDev/experiments/go/chip-8/chip8/timer"
+	"math/rand"
 	"os"
 
 	"github.com/EldoranDev/experiments/go/chip-8/chip8/font"
@@ -30,9 +32,6 @@ type Cpu struct {
 	// index register
 	I uint16
 
-	// Address Stack
-	Stack *stack.Stack
-
 	// Timer
 	Delay byte
 	Sound byte
@@ -40,11 +39,18 @@ type Cpu struct {
 	// General Purpose 16 bit Registers V0 - VF
 	V [16]uint8
 
+	// "Hardware" of the Emulator
+
+	// Address Stack
+	Stack *stack.Stack
+
 	// Screen abstraction to interact with game engine
 	Screen *screen.Screen
 
 	// Keyboard abstraction to interact with game engine
 	Keyboard *keyboard.Keyboard
+
+	Timer *timer.Timer
 }
 
 func New() *Cpu {
@@ -52,6 +58,7 @@ func New() *Cpu {
 		Stack:    stack.New(),
 		Screen:   screen.New(),
 		Keyboard: keyboard.New(),
+		Timer:    timer.New(),
 	}
 }
 
@@ -198,6 +205,9 @@ func (c *Cpu) Execute(instr uint16, op *Op) {
 	case 0xA000:
 		c.I = op.NNN
 		break
+	case 0xC000:
+		c.V[op.X] = uint8(rand.Int()) & op.NN
+		break
 	case 0xD000:
 		x := c.V[op.X] & 63 // Wrap X-Coord
 		y := c.V[op.Y] & 31 // Wrap Y-Coord
@@ -205,6 +215,8 @@ func (c *Cpu) Execute(instr uint16, op *Op) {
 		c.V[0xF] = 0 // Reset Flag
 
 		masks := [8]uint8{128, 64, 32, 16, 8, 4, 2, 1}
+
+		fmt.Printf("(%d, %d)\n", x, y)
 
 		for i := range op.N {
 			n := c.I + uint16(i)
@@ -237,6 +249,15 @@ func (c *Cpu) Execute(instr uint16, op *Op) {
 		break
 	case 0xF000:
 		switch op.NN {
+		case 0x07:
+			c.V[op.X] = c.Timer.Delay
+			break
+		case 0x15:
+			c.Timer.Delay = c.V[op.X]
+			break
+		case 0x18:
+			c.Timer.Sound = c.V[op.X]
+			break
 		case 0x1E:
 			c.I += uint16(c.V[op.X])
 
@@ -270,6 +291,7 @@ func (c *Cpu) Execute(instr uint16, op *Op) {
 			// c.I += op.X + 1
 			break
 		default:
+			c.Error = true
 			fmt.Printf("Unhandled OP 0xF000 Code: %x (%v)\n", op.NN, op)
 			break
 		}
