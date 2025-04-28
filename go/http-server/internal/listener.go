@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"net"
@@ -86,6 +87,8 @@ func (s *listener) handle(conn net.Conn) {
 		res := &Response{
 			Version: "1.1",
 			Header:  make(Header),
+
+			Body: bytes.Buffer{},
 		}
 
 		var handler Handler = func(req *Request, res *Response) {
@@ -107,6 +110,12 @@ func (s *listener) handle(conn net.Conn) {
 			break
 		}
 
+		encoder := encoding.GetEncoder(req.Header.Get("Accept-Encoding"))
+
+		if encoder != nil {
+			res.Encoder = encoder
+		}
+
 		handler(req, res)
 
 		conHeader := req.Header.Get("Connection")
@@ -116,15 +125,7 @@ func (s *listener) handle(conn net.Conn) {
 			res.Header.Set("Connection", "close")
 		}
 
-		var enc *string
-
-		encHeader := req.Header.Get("Accept-Encoding")
-
-		if encHeader != nil {
-			enc = encoding.GetEncoding(*encHeader)
-		}
-
-		_, err = conn.Write(res.ToBytes(enc))
+		_, err = conn.Write(res.ToBytes())
 
 		if err != nil {
 			fmt.Println("Error writing response:", err.Error())

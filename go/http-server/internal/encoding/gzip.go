@@ -9,12 +9,16 @@ import (
 type GzipEncoder struct {
 }
 
-func (e *GzipEncoder) Encode(data bytes.Buffer) bytes.Buffer {
+func (e *GzipEncoder) Name() string {
+	return "gzip"
+}
+
+func (e *GzipEncoder) Encode(data []byte) bytes.Buffer {
 	var buf bytes.Buffer
 
 	zw := gzip.NewWriter(&buf)
 
-	_, err := zw.Write(data.Bytes())
+	_, err := zw.Write(data)
 	if err != nil {
 		log.Fatal(err)
 	}

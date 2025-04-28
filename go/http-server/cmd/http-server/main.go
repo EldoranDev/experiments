@@ -22,7 +22,7 @@ func main() {
 
 	l.Add("GET", "/echo/([a-zA-Z]+)", func(req *http.Request, res *http.Response) {
 		res.Status = http.StatusOk
-		res.Write([]byte(req.Params[1]))
+		res.Body.Write([]byte(req.Params[1]))
 		res.SetContentType("text/plain")
 	})
 
@@ -42,7 +42,7 @@ func main() {
 
 		res.Status = http.StatusOk
 		res.SetContentType("application/octet-stream")
-		res.Write(dat)
+		res.Body.Write(dat)
 	})
 
 	l.Add("POST", "/files/(.+)", func(req *http.Request, res *http.Response) {
@@ -65,7 +65,7 @@ func main() {
 
 		if ua != nil {
 			res.SetContentType("text/plain")
-			res.Write([]byte(*ua))
+			res.Body.Write([]byte(*ua))
 			return
 		}
 	})
